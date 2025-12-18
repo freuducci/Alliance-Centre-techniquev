@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alliance Centre Universitaire et Technique - Plateforme Interactive</title>
+    <meta name="description" content="Plateforme officielle de l'Alliance CU. Explorez nos formations techniques, commerciales et universitaires. 24 ans d'excellence.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Config Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        allianceGreen: '#45af48',
+                        allianceOrange: '#f3a30c',
+                        slateDark: '#020617',
+                        slateCard: '#0f172a'
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styles */
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Chart Container Strict Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #45af48;
+            border-radius: 4px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Interactive Elements */
+        .nav-item {
+            position: relative;
+        }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #45af48;
+            transition: width 0.3s;
+        }
+        .nav-item:hover::after {
+            width: 100%;
+        }
+
+        .filter-btn.active {
+            background-color: #45af48;
+            color: #ffffff;
+            border-color: #45af48;
+        }
+    </style>
+
+    <!-- Placeholder Comments -->
+    <!-- Chosen Palette: Institutional Green (#45af48) and Orange (#f3a30c) on Slate-950 base for professional authority. -->
+    
+    <!-- Application Structure Plan:
+         1. Header/Nav: Fixed glassmorphism header for easy access to sections.
+         2. Hero: Visual impact with key stats (24 years, 9 branches) to establish credibility immediately.
+         3. Pedagogical Dashboard: A dedicated section to visualize the "Competency Approach" using a Radar Chart, explaining the teaching philosophy before the courses.
+         4. Course Explorer (The Core): A tabbed, filterable interface. Instead of a long list, users click "Commerciale", "Technique", etc. to see relevant cards. Includes a "Duration Comparison" chart that updates dynamically based on the selected category.
+         5. Detail Modal: Clicking a course opens a full-screen modal with specific modules, goals, and downloads (simulated), keeping the user on the single page.
+         6. Seminars & Network: Visual blocks for mandatory seminars and the branch map concept.
+         7. Footer: Standard institutional footer.
+         Why this structure? It handles the high volume of course data (30+ courses) without overwhelming the user, allowing them to "drill down" from Category -> Course -> Details.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Duration Comparison Bar Chart: Located in the Explorer. Goal: Compare course lengths. Method: Chart.js Bar Chart. Justification: Helps users quickly identify short vs long courses in a category.
+         2. Competency Radar Chart: Located in Pedagogy section. Goal: Visualise the holistic approach (Cognitive, Psychomotor, Socio-affective). Method: Chart.js Radar. Justification: Translates abstract pedagogical concepts into a concrete visual shape.
+         3. Placement Rate Donut: Located in Hero. Goal: Inform about success rates. Method: Chart.js Doughnut. Justification: Immediate social proof.
+         4. Network Map Placeholder: Interactive list/grid for branches. Goal: Inform about locations. Method: HTML/CSS Grid.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-allianceGreen to-allianceOrange rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                        A
+                    </div>
+                    <span class="font-bold text-xl tracking-tight">ALLIANCE<span class="text-allianceGreen">CU</span></span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#hero" class="nav-item text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Accueil</a>
+                        <a href="#pedagogy" class="nav-item text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Pédagogie</a>
+                        <a href="#explorer" class="nav-item text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Formations</a>
+                        <a href="#network" class="nav-item text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Réseau</a>
+                        <a href="#admissions" class="bg-allianceGreen text-white hover:bg-green-600 px-5 py-2 rounded-full text-sm font-bold transition-transform hover:scale-105 shadow-lg shadow-green-500/20">Admissions</a>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="text-gray-400 hover:text-white p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden glass border-t border-white/5" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#hero" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Accueil</a>
+                <a href="#pedagogy" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Pédagogie</a>
+                <a href="#explorer" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Formations</a>
+                <a href="#admissions" class="text-allianceGreen block px-3 py-2 rounded-md text-base font-bold">S'inscrire</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="hero" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <!-- Background Glow -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-allianceGreen/10 rounded-full blur-[120px] -z-10"></div>
+        <div class="absolute bottom-0 right-0 w-[400px] h-[400px] bg-allianceOrange/10 rounded-full blur-[100px] -z-10"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="animate-fade-in">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-allianceGreen text-xs font-bold uppercase tracking-wider mb-6">
+                        <span class="w-2 h-2 rounded-full bg-allianceGreen animate-pulse"></span>
+                        Accrédité INFP
+                    </div>
+                    <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6">
+                        Bâtis ton avenir, <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-allianceGreen to-allianceOrange">ici et maintenant.</span>
+                    </h1>
+                    <p class="text-lg text-gray-400 mb-8 max-w-xl leading-relaxed">
+                        Alliance Centre Universitaire et Technique forme les leaders de demain depuis 24 ans. Une approche par compétences pour une insertion professionnelle garantie.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#explorer" class="px-8 py-4 bg-white text-slate-900 rounded-xl font-bold hover:bg-gray-100 transition-colors shadow-xl">
+                            Explorer les filières
+                        </a>
+                        <a href="#contact" class="px-8 py-4 glass text-white rounded-xl font-bold hover:bg-white/10 transition-colors border border-white/10">
+                            Rencontrer un conseiller
+                        </a>
+                    </div>
+                    
+                    <div class="mt-12 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
+                        <div>
+                            <p class="text-3xl font-bold text-white">24</p>
+                            <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Ans d'expérience</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-white">9</p>
+                            <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Succursales</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-white">89%</p>
+                            <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Taux d'insertion</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Chart -->
+                <div class="relative glass p-8 rounded-3xl border border-white/10 animate-fade-in lg:mt-0 mt-10">
+                    <h3 class="text-xl font-bold mb-2">Impact & Résultats</h3>
+                    <p class="text-sm text-gray-400 mb-6">Nos diplômés s'intègrent rapidement sur le marché.</p>
+                    
+                    <div class="chart-container">
+                        <canvas id="heroChart"></canvas>
+                    </div>
+                    
+                    <!-- Decorative elements -->
+                    <div class="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-allianceGreen to-allianceOrange rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/30">
+                        <i class="fas fa-graduation-cap text-2xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Pedagogy Section -->
+    <section id="pedagogy" class="py-20 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-5 gap-12 items-center">
+                <div class="lg:col-span-2">
+                    <h2 class="text-3xl font-bold mb-6">Notre Approche Pédagogique</h2>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        Le programme est défini par compétences et structuré en modules. Il ne s'agit pas seulement de savoir, mais de savoir-faire et de savoir-être.
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-allianceGreen/20 text-allianceGreen flex items-center justify-center flex-shrink-0 mt-1">1</div>
+                            <p class="text-sm text-gray-300"><strong class="text-white">Cognitif :</strong> Connaissances théoriques et techniques approfondies.</p>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-allianceOrange/20 text-allianceOrange flex items-center justify-center flex-shrink-0 mt-1">2</div>
+                            <p class="text-sm text-gray-300"><strong class="text-white">Psychomoteur :</strong> Habiletés pratiques et maîtrise des outils.</p>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0 mt-1">3</div>
+                            <p class="text-sm text-gray-300"><strong class="text-white">Socio-affectif :</strong> Attitudes professionnelles, éthique et relations humaines.</p>
+                        </li>
+                    </ul>
+                    <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Direction Académique</h4>
+                        <p class="font-bold text-white">Viviane St Fleur Francois</p>
+                        <p class="text-xs text-allianceGreen">Directrice des cours commerciaux</p>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-3 glass p-6 rounded-3xl">
+                    <h3 class="text-center font-bold mb-4">Répartition des Compétences</h3>
+                    <div class="chart-container">
+                        <canvas id="competencyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Course Explorer Section -->
+    <section id="explorer" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">Explorez nos Filières</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    Une offre de formation complète adaptée aux besoins du marché haïtien et international.
+                </p>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-10">
+                <!-- Filter Tabs -->
+                <div class="flex flex-wrap gap-2 justify-center" id="categoryFilters">
+                    <button class="filter-btn active px-4 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-sm font-bold" data-category="Commerciale">Commerciale</button>
+                    <button class="filter-btn px-4 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-sm font-bold" data-category="Technique">Technique</button>
+                    <button class="filter-btn px-4 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-sm font-bold" data-category="Sciences">Sciences (Univ)</button>
+                    <button class="filter-btn px-4 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-sm font-bold" data-category="Courte">Courte Durée</button>
+                    <button class="filter-btn px-4 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-sm font-bold" data-category="Langues">Langues</button>
+                </div>
+                
+                <!-- Search -->
+                <div class="relative w-full md:w-64">
+                    <input type="text" id="courseSearch" placeholder="Rechercher un cours..." class="w-full bg-slate-900 border border-white/10 rounded-lg px-4 py-2 pl-10 text-sm focus:outline-none focus:border-allianceGreen transition-colors">
+                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Course Grid (Dynamic) -->
+                <div class="lg:col-span-2 grid sm:grid-cols-2 gap-4" id="courseGrid">
+                    <!-- Cards will be injected here -->
+                </div>
+
+                <!-- Stats Panel (Dynamic Chart) -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-24">
+                        <div class="glass p-6 rounded-2xl border border-white/10 mb-6">
+                            <h3 class="text-lg font-bold mb-2">Comparatif des Durées</h3>
+                            <p class="text-xs text-gray-400 mb-4">Mois de formation par option</p>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="durationChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Seminars Mini-Block -->
+                        <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-white/5">
+                            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-users-cog text-allianceGreen"></i> 
+                                Séminaires Obligatoires
+                            </h3>
+                            <p class="text-xs text-gray-400 mb-4">Inclus dans toutes les formations longues.</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="px-3 py-2 bg-black/20 rounded text-xs text-gray-300">Éthique Pro</div>
+                                <div class="px-3 py-2 bg-black/20 rounded text-xs text-gray-300">Entreprenariat</div>
+                                <div class="px-3 py-2 bg-black/20 rounded text-xs text-gray-300">Français</div>
+                                <div class="px-3 py-2 bg-black/20 rounded text-xs text-gray-300">Santé/Sécu</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Network Section -->
+    <section id="network" class="py-20 bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-12">Notre Réseau National</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceGreen transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceGreen mb-2"></i>
+                    <h3 class="font-bold">Delmas</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceOrange transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceOrange mb-2"></i>
+                    <h3 class="font-bold">Pétion-Ville</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceGreen transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceGreen mb-2"></i>
+                    <h3 class="font-bold">Cap-Haïtien</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceOrange transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceOrange mb-2"></i>
+                    <h3 class="font-bold">Gonaïves</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceGreen transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceGreen mb-2"></i>
+                    <h3 class="font-bold">Saint-Marc</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceOrange transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceOrange mb-2"></i>
+                    <h3 class="font-bold">Carrefour</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceGreen transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceGreen mb-2"></i>
+                    <h3 class="font-bold">Jacmel</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceOrange transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceOrange mb-2"></i>
+                    <h3 class="font-bold">Les Cayes</h3>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-allianceGreen transition-colors cursor-default">
+                    <i class="fas fa-map-marker-alt text-allianceGreen mb-2"></i>
+                    <h3 class="font-bold">Port-au-Prince</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admissions / Contact -->
+    <section id="admissions" class="py-20 bg-gradient-to-b from-slate-900 to-black">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-panel p-8 md:p-12 rounded-3xl border border-white/10 text-center">
+                <h2 class="text-3xl font-bold mb-4">Commencez votre Inscription</h2>
+                <p class="text-gray-400 mb-8">
+                    Remplissez ce formulaire pour être contacté par un conseiller académique.
+                </p>
+                <form class="space-y-4 text-left">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Prénom</label>
+                            <input type="text" class="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-allianceGreen transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nom</label>
+                            <input type="text" class="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-allianceGreen transition-colors">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+                        <input type="email" class="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-allianceGreen transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Filière d'intérêt</label>
+                        <select class="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-allianceGreen transition-colors">
+                            <option>Section Commerciale</option>
+                            <option>Section Technique</option>
+                            <option>Sciences Universitaires</option>
+                            <option>Courte Durée</option>
+                            <option>Langues</option>
+                        </select>
+                    </div>
+                    <button type="button" class="w-full py-4 bg-gradient-to-r from-allianceGreen to-green-600 rounded-lg font-bold text-white shadow-lg hover:shadow-green-500/20 transition-all transform hover:-translate-y-1">
+                        Envoyer ma demande
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-12 bg-black">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <div class="w-8 h-8 bg-allianceGreen rounded flex items-center justify-center text-white font-bold">A</div>
+                <span class="font-bold text-lg">ALLIANCE<span class="text-allianceGreen">CU</span></span>
+            </div>
+            <p class="text-gray-500 text-sm mb-6">© 2025 Alliance Centre Universitaire et Technique. Tous droits réservés.</p>
+            <div class="flex justify-center gap-6">
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Course Detail Modal -->
+    <div id="courseModal" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        
+        <!-- Content -->
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-white/10 w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-fade-in relative">
+                
+                <button onclick="closeModal()" class="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-allianceGreen transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <!-- Modal Header -->
+                <div class="p-8 bg-gradient-to-r from-slate-800 to-slate-900 border-b border-white/5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span id="modalCategoryBadge" class="px-3 py-1 rounded-full bg-allianceGreen/20 text-allianceGreen text-xs font-bold uppercase">Technique</span>
+                        <span id="modalDuration" class="px-3 py-1 rounded-full bg-white/5 text-gray-300 text-xs font-bold uppercase"><i class="far fa-clock mr-1"></i> 12 Mois</span>
+                    </div>
+                    <h2 id="modalTitle" class="text-3xl md:text-4xl font-extrabold text-white">Techniques Bancaires</h2>
+                </div>
+
+                <!-- Modal Body (Scrollable) -->
+                <div class="p-8 overflow-y-auto custom-scrollbar">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-2 space-y-8">
+                            <div>
+                                <h3 class="text-allianceGreen font-bold uppercase tracking-wider text-xs mb-3">Description</h3>
+                                <p id="modalDesc" class="text-gray-300 leading-relaxed">
+                                    Description text here...
+                                </p>
+                            </div>
+
+                            <div>
+                                <h3 class="text-allianceGreen font-bold uppercase tracking-wider text-xs mb-3">Modules & Compétences</h3>
+                                <div id="modalModules" class="grid sm:grid-cols-2 gap-3">
+                                    <!-- Modules injected here -->
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                                <h3 class="text-white font-bold text-sm mb-2"><i class="fas fa-bullseye text-allianceGreen mr-2"></i>Buts de la formation</h3>
+                                <p id="modalGoals" class="text-sm text-gray-400">Goals here...</p>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar in Modal -->
+                        <div class="space-y-4">
+                            <div class="p-4 rounded-xl bg-slate-950 border border-white/5">
+                                <h4 class="font-bold text-white mb-2">Inclus</h4>
+                                <ul class="text-sm text-gray-400 space-y-2">
+                                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Syllabus</li>
+                                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Pamphlet</li>
+                                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Stage Interne</li>
+                                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Stage Externe</li>
+                                </ul>
+                            </div>
+                            <button class="w-full py-3 bg-allianceGreen hover:bg-green-600 rounded-xl text-white font-bold transition-colors">
+                                Télécharger Brochure
+                            </button>
+                             <button class="w-full py-3 border border-white/20 hover:bg-white/5 rounded-xl text-white font-bold transition-colors">
+                                Pré-inscription
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA STORE ---
+        // Extracted from the Source Report & Sitemap
+        const courseData = [
+            // Commerciale
+            { id: 1, category: "Commerciale", title: "Techniques Bancaires", duration: "12 mois", durationVal: 12, desc: "Formation complète sur les opérations bancaires, la gestion de caisse et le service à la clientèle dans le secteur financier.", modules: ["Opérations bancaires", "Analyse de crédit", "Guichet", "Mathématiques financières"], goals: "Maîtriser les flux financiers et le service client." },
+            { id: 2, category: "Commerciale", title: "Techniques Douanières", duration: "12 mois", durationVal: 12, desc: "Maîtrise des procédures d'import/export, de la tarification et de la législation douanière haïtienne.", modules: ["Législation", "Tarif douanier", "Logistique", "Transit"], goals: "Gérer le dédouanement de marchandises." },
+            { id: 3, category: "Commerciale", title: "Hôtellerie et Tourisme", duration: "18 mois", durationVal: 18, desc: "Formation aux métiers de l'accueil, de la gestion hôtelière et de la promotion touristique.", modules: ["Accueil", "Gestion hôtelière", "Gastronomie", "Anglais touristique"], goals: "Gérer des établissements touristiques." },
+            { id: 4, category: "Commerciale", title: "Assistance Administrative", duration: "24 mois", durationVal: 24, desc: "Gestion administrative avancée, bureautique et organisation de bureau.", modules: ["Secrétariat", "Archivage", "Communication", "Informatique"], goals: "Assurer le support administratif d'une entreprise." },
+            { id: 5, category: "Commerciale", title: "Comptabilité Informatisée", duration: "18 mois", durationVal: 18, desc: "Tenue de livres comptables utilisant les logiciels modernes (QuickBooks, Sage).", modules: ["Comptabilité générale", "Fiscalité", "Logiciels comptables", "Audit"], goals: "Produire des états financiers informatisés." },
+            { id: 6, category: "Commerciale", title: "Communication et Journalisme", duration: "24 mois", durationVal: 24, desc: "Techniques de journalisme, rédaction, présentation TV/Radio et communication institutionnelle.", modules: ["Rédaction presse", "Diction", "Montage", "Relations publiques"], goals: "Devenir un professionnel des médias." },
+            
+            // Technique
+            { id: 7, category: "Technique", title: "Informatique Bureautique", duration: "12 mois", durationVal: 12, desc: "Maîtrise complète de la suite Office et des outils numériques essentiels.", modules: ["Word", "Excel", "PowerPoint", "Access", "Internet"], goals: "Productivité bureautique maximale." },
+            { id: 8, category: "Technique", title: "Dépannage Informatique", duration: "5 mois", durationVal: 5, desc: "Maintenance hardware et software, diagnostic et réparation d'ordinateurs.", modules: ["Architecture PC", "Systèmes OS", "Réseau base", "Diagnostic"], goals: "Réparer et entretenir un parc informatique." },
+            { id: 9, category: "Technique", title: "Réseaux Informatiques", duration: "8 mois", durationVal: 8, desc: "Installation, configuration et administration de réseaux locaux et étendus.", modules: ["Câblage", "Routeurs/Switch", "TCP/IP", "Sécurité"], goals: "Administrer une infrastructure réseau." },
+            { id: 10, category: "Technique", title: "Infographie", duration: "6 mois", durationVal: 6, desc: "Création visuelle numérique pour l'impression et le web.", modules: ["Photoshop", "Illustrator", "Design Theory", "Branding"], goals: "Créer des supports de communication visuelle." },
+            { id: 11, category: "Technique", title: "Montage Vidéo & Photo", duration: "8 mois", durationVal: 8, desc: "Prise de vue, retouche photo et montage vidéo professionnel.", modules: ["Premiere Pro", "Lightroom", "Cadrage", "Scénario"], goals: "Produire des contenus audiovisuels." },
+            { id: 12, category: "Technique", title: "Électricité Bâtiment", duration: "9 mois", durationVal: 9, desc: "Installation électrique résidentielle et commerciale aux normes.", modules: ["Circuits", "Sécurité", "Plans électriques", "Câblage"], goals: "Réaliser des installations électriques sûres." },
+            { id: 13, category: "Technique", title: "Cosmétologie", duration: "9 mois", durationVal: 9, desc: "Techniques de beauté, soins de la peau, maquillage et coiffure.", modules: ["Maquillage", "Soins visage", "Coiffure", "Hygiène"], goals: "Exercer dans les métiers de la beauté." },
+
+            // Sciences (Univ) - 4 years = 48 months
+            { id: 14, category: "Sciences", title: "Sciences Comptables", duration: "4 ans", durationVal: 48, desc: "Cursus universitaire complet en expertise comptable et audit.", modules: ["Comptabilité approfondie", "Finance", "Audit", "Droit fiscal"], goals: "Expert-comptable ou Auditeur." },
+            { id: 15, category: "Sciences", title: "Sciences de la Gestion", duration: "4 ans", durationVal: 48, desc: "Formation supérieure en management et stratégie d'entreprise.", modules: ["Management", "Marketing stratégique", "GRH", "Opérations"], goals: "Manager ou Chef d'entreprise." },
+            { id: 16, category: "Sciences", title: "Sciences Administratives", duration: "4 ans", durationVal: 48, desc: "Gestion des organisations publiques et privées.", modules: ["Politiques publiques", "Droit admin", "Gestion projet", "Éthique"], goals: "Administrateur de haut niveau." },
+            { id: 17, category: "Sciences", title: "Sciences Économiques", duration: "4 ans", durationVal: 48, desc: "Analyse économique, micro/macroéconomie et développement.", modules: ["Microéconomie", "Macroéconomie", "Statistiques", "Développement"], goals: "Économiste ou Analyste." },
+            { id: 18, category: "Sciences", title: "Sciences Informatiques", duration: "4 ans", durationVal: 48, desc: "Génie logiciel, développement systèmes et bases de données.", modules: ["Programmation", "Algorithmes", "SGBD", "Génie Logiciel"], goals: "Ingénieur Informaticien." },
+
+            // Courte Durée (Short)
+            { id: 19, category: "Courte", title: "Logistique & Stock", duration: "3 mois", durationVal: 3, desc: "Gestion des flux de marchandises et inventaires.", modules: ["Inventaire", "Approvisionnement", "Transport"], goals: "Gestionnaire de stock." },
+            { id: 20, category: "Courte", title: "Ressources Humaines", duration: "6 mois", durationVal: 6, desc: "Bases de la gestion du personnel.", modules: ["Recrutement", "Paie", "Droit du travail"], goals: "Assistant RH." },
+            { id: 21, category: "Courte", title: "Maquillage", duration: "3 mois", durationVal: 3, desc: "Techniques de maquillage professionnel.", modules: ["Jour/Soir", "Mariage", "Produits"], goals: "Maquilleuse pro." },
+            { id: 22, category: "Courte", title: "Entrepreneuriat", duration: "3 mois", durationVal: 3, desc: "Lancer et gérer sa petite entreprise.", modules: ["Business Plan", "Marketing", "Finance base"], goals: "Créer son entreprise." },
+            { id: 23, category: "Courte", title: "QuickBooks / ACCPAC", duration: "3 mois", durationVal: 3, desc: "Maîtrise des logiciels comptables spécifiques.", modules: ["Saisie", "Rapports", "Paramétrage"], goals: "Opérateur comptable." },
+
+            // Langues
+            { id: 30, category: "Langues", title: "Anglais", duration: "12 mois", durationVal: 12, desc: "Anglais communicatif et professionnel.", modules: ["Grammar", "Conversation", "Writing", "Listening"], goals: "Bilinguisme professionnel." },
+            { id: 31, category: "Langues", title: "Espagnol", duration: "10 mois", durationVal: 10, desc: "Espagnol pour les affaires et la communication.", modules: ["Gramática", "Conversación", "Cultura"], goals: "Communication fluide en espagnol." },
+            { id: 32, category: "Langues", title: "Communication Française", duration: "10 mois", durationVal: 10, desc: "Perfectionnement du français écrit et oral.", modules: ["Orthographe", "Rédaction", "Art oratoire"], goals: "Excellence en communication." },
+            { id: 33, category: "Langues", title: "Communication Créole", duration: "6 mois", durationVal: 6, desc: "Maîtrise du créole standard et professionnel.", modules: ["Gramè", "Lekti", "Ekriti"], goals: "Communication professionnelle en créole." }
+        ];
+
+        // --- CHART INSTANCES ---
+        let heroChartInstance = null;
+        let competencyChartInstance = null;
+        let durationChartInstance = null;
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            renderCourses('Commerciale'); // Default Category
+            setupEventListeners();
+        });
+
+        // --- CHARTS LOGIC ---
+        function initCharts() {
+            // 1. Hero Chart: Placement Rates (Doughnut)
+            const ctxHero = document.getElementById('heroChart').getContext('2d');
+            heroChartInstance = new Chart(ctxHero, {
+                type: 'doughnut',
+                data: {
+                    labels: ['En Poste', 'Poursuite Études', 'Recherche'],
+                    datasets: [{
+                        data: [89, 8, 3],
+                        backgroundColor: ['#45af48', '#f3a30c', '#334155'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', usePointStyle: true } },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)' }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // 2. Pedagogy Chart: Competency Radar (Radar)
+            const ctxComp = document.getElementById('competencyChart').getContext('2d');
+            competencyChartInstance = new Chart(ctxComp, {
+                type: 'radar',
+                data: {
+                    labels: ['Cognitif (Savoir)', 'Technique (Savoir-faire)', 'Relationnel (Savoir-être)', 'Éthique', 'Innovation', 'Pratique'],
+                    datasets: [{
+                        label: 'Modèle Alliance CU',
+                        data: [90, 95, 85, 90, 80, 95],
+                        fill: true,
+                        backgroundColor: 'rgba(69, 175, 72, 0.2)',
+                        borderColor: '#45af48',
+                        pointBackgroundColor: '#45af48',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#45af48'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { color: '#cbd5e1', font: { size: 12 } },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // 3. Duration Chart: Placeholder (Initialized empty, updated via filter)
+            const ctxDur = document.getElementById('durationChart').getContext('2d');
+            durationChartInstance = new Chart(ctxDur, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { display: false }, ticks: { color: '#fff' } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)' }
+                    }
+                }
+            });
+        }
+
+        // --- CORE FUNCTIONALITY ---
+        function renderCourses(category, searchTerm = '') {
+            const grid = document.getElementById('courseGrid');
+            grid.innerHTML = ''; // Clear
+
+            // Filter
+            const filtered = courseData.filter(c => {
+                const matchesCategory = c.category === category;
+                const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesCategory && matchesSearch;
+            });
+
+            // Populate Grid
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p class="text-gray-500 italic col-span-2">Aucun cours trouvé.</p>';
+            } else {
+                filtered.forEach(course => {
+                    const card = document.createElement('div');
+                    card.className = 'glass p-6 rounded-2xl border border-white/5 hover:border-allianceGreen transition-all cursor-pointer group';
+                    card.onclick = () => openModal(course.id);
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="px-2 py-1 rounded bg-white/5 text-xs text-gray-400 font-bold uppercase">${course.duration}</span>
+                            <i class="fas fa-arrow-right text-allianceGreen opacity-0 group-hover:opacity-100 transition-opacity transform -translate-x-2 group-hover:translate-x-0"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-allianceGreen transition-colors">${course.title}</h3>
+                        <p class="text-sm text-gray-400 line-clamp-2">${course.desc}</p>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            // Update Duration Chart
+            updateDurationChart(filtered);
+        }
+
+        function updateDurationChart(courses) {
+            const labels = courses.map(c => c.title.split(' ')[0]); // Shorten labels
+            const data = courses.map(c => c.durationVal);
+
+            durationChartInstance.data.labels = labels;
+            durationChartInstance.data.datasets = [{
+                label: 'Durée (Mois)',
+                data: data,
+                backgroundColor: '#f3a30c',
+                borderRadius: 4
+            }];
+            durationChartInstance.update();
+        }
+
+        function setupEventListeners() {
+            // Filter Buttons
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Remove active class
+                    buttons.forEach(b => b.classList.remove('active', 'bg-allianceGreen', 'text-white', 'border-allianceGreen'));
+                    buttons.forEach(b => b.classList.add('bg-white/5', 'text-white'));
+                    
+                    // Add active class
+                    e.target.classList.remove('bg-white/5');
+                    e.target.classList.add('active', 'bg-allianceGreen', 'text-white', 'border-allianceGreen');
+                    
+                    const cat = e.target.getAttribute('data-category');
+                    renderCourses(cat, document.getElementById('courseSearch').value);
+                });
+            });
+
+            // Search Input
+            document.getElementById('courseSearch').addEventListener('input', (e) => {
+                const activeBtn = document.querySelector('.filter-btn.active');
+                const cat = activeBtn ? activeBtn.getAttribute('data-category') : 'Commerciale';
+                renderCourses(cat, e.target.value);
+            });
+        }
+
+        // --- MODAL LOGIC ---
+        function openModal(id) {
+            const course = courseData.find(c => c.id === id);
+            if (!course) return;
+
+            document.getElementById('modalTitle').innerText = course.title;
+            document.getElementById('modalCategoryBadge').innerText = course.category;
+            document.getElementById('modalDuration').innerHTML = `<i class="far fa-clock mr-1"></i> ${course.duration}`;
+            document.getElementById('modalDesc').innerText = course.desc;
+            document.getElementById('modalGoals').innerText = course.goals;
+
+            // Render Modules
+            const modulesContainer = document.getElementById('modalModules');
+            modulesContainer.innerHTML = course.modules.map(m => `
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-white/5">
+                    <i class="fas fa-layer-group text-allianceGreen text-xs"></i>
+                    <span class="text-sm font-medium text-gray-200">${m}</span>
+                </div>
+            `).join('');
+
+            const modal = document.getElementById('courseModal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('courseModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
